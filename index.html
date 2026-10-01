@@ -1,0 +1,1367 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>चुपाकाबरा खाता — अखंड क्रिप्टोग्राफ़िक लेज़र</title>
+  
+  <meta name="theme-color" content="#0b0f19">
+  <link rel="icon" type="image/png" href="logo.png">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <!-- भाग 2 (CSS) यहाँ जुड़ेगा -->
+</head>
+<body oncontextmenu="return false;">
+
+  <div id="splashScreen">
+    <div style="text-align:center;">
+      <div style="font-size:46px;">🐉</div>
+      <h1 style="color:#fff;font-size:22px;font-weight:800;margin-top:10px;">चुपाकाबरा खाता</h1>
+      <p style="color:#94a3b8;font-size:12px;margin-top:4px;">क्रिप्टोग्राफ़िक सिंगल-सोर्स बहीखाता</p>
+    </div>
+  </div>
+
+  <div class="app">
+    <!-- शीर्ष हेडर -->
+    <header class="header">
+      <div class="brand" onclick="speakMunshiHonorific()">
+        <div class="logo-box">🐉</div>
+        <div>
+          <h1 id="hdrShopTitle">मेरी दुकान</h1>
+          <small id="hdrPanchang">लोड हो रहा है...</small>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="vault-badge" title="सत्यापित बरकत तिजोरी" onclick="openGameModal()">
+          <span>🪙</span>
+          <span id="vaultBalance">0.00</span>
+        </div>
+        <button class="icon-btn" onclick="openSettingsModal()">⚙️</button>
+      </div>
+    </header>
+
+    <!-- ब्लॉकचेन स्टेटस बैज -->
+    <div id="chainStatusBox" class="chain-badge">
+      ✓ ब्लॉकचेन लेज़र सुरक्षित (0% छेड़छाड़ • PoW Verified)
+    </div>
+
+    <!-- डैशबोर्ड कार्ड (सिंगल सोर्स से लाइव गणना) -->
+    <section class="balance-card">
+      <div class="balance-title">गद्दी की कुल शुद्ध स्थिति (NET BALANCE)</div>
+      <div class="balance-val" id="netBalanceVal">₹0</div>
+      <div class="stats-row">
+        <div class="stat-box">कुल लेना है (उधार): <b class="text-red" id="totOutVal">₹0</b></div>
+        <div class="stat-box">कुल देना/जमा मिला: <b class="text-green" id="totInVal">₹0</b></div>
+      </div>
+    </section>
+
+    <!-- 1. ग्राहक व व्यापारी बहीखाता कार्ड -->
+    <section class="ledger-box">
+      <div class="trigger-row" onclick="toggleDrawer('partyDrawer', 'partyToggleBtn')">
+        <div class="trigger-info">
+          <span style="font-size:20px;">📒</span>
+          <div>
+            <h3>खाताबही (ग्राहक व व्यापारी)</h3>
+            <small id="partyCountTxt">0 खाते दर्ज</small>
+          </div>
+        </div>
+        <button id="partyToggleBtn" class="pill-btn">खोलें 📂</button>
+      </div>
+
+      <div id="partyDrawer" class="drawer-content">
+        <div class="tab-grid">
+          <button id="tabCust" class="tab-btn active" onclick="switchPartyMode('customer')">👤 ग्राहक</button>
+          <button id="tabSupp" class="tab-btn" onclick="switchPartyMode('supplier')">🤝 व्यापारी भाई</button>
+        </div>
+        <input type="text" id="partySearch" class="input" placeholder="🔎 नाम या फ़ोन नंबर से खोजें..." oninput="renderParties()">
+        <div id="partyList" class="item-list"></div>
+      </div>
+    </section>
+
+    <!-- 2. गद्दी रोज़नामचा (खर्च) कार्ड -->
+    <section class="ledger-box">
+      <div class="trigger-row" onclick="toggleDrawer('expenseDrawer', 'expToggleBtn')">
+        <div class="trigger-info">
+          <span style="font-size:20px;">🪙</span>
+          <div>
+            <h3>गद्दी रोज़नामचा (दुकान व घरेलू खर्च)</h3>
+            <small id="expSummaryTxt">इस महीने: ₹0</small>
+          </div>
+        </div>
+        <button id="expToggleBtn" class="pill-btn">खर्च खोलें 📂</button>
+      </div>
+
+      <div id="expenseDrawer" class="drawer-content">
+        <div class="form-mini">
+          <div class="grid-2">
+            <input type="number" id="expAmount" class="input" placeholder="राशि (₹)" min="1" step="any">
+            <select id="expCategory" class="input">
+              <option value="दुकान खर्च">🏪 दुकान खर्च / माल भाड़ा</option>
+              <option value="दूध व किराना">🥛 दूध व किराना</option>
+              <option value="चाय-नाश्ता">☕ चाय-नाश्ता</option>
+              <option value="किराया व बिजली">💡 किराया व बिजली</option>
+              <option value="घरेलू खर्च">🏠 घरेलू खर्च</option>
+              <option value="अन्य">📦 अन्य खर्च</option>
+            </select>
+          </div>
+          <div class="grid-2">
+            <input type="text" id="expNote" class="input" placeholder="विवरण (उदा. 5L रिफाइंड)">
+            <input type="date" id="expDate" class="input">
+          </div>
+          <button id="mineExpBtn" class="btn btn-gold btn-full" onclick="mineExpense()">⛏️ खर्च ब्लॉक माइन करें</button>
+        </div>
+        <div class="action-bar">
+          <span style="font-size:12px; font-weight:700;">हालिया खर्च लेज़र:</span>
+          <div style="display:flex; gap:6px;">
+            <button class="pill-btn-sm" onclick="printExpenseSlip()">🖨️ पर्ची</button>
+            <button class="pill-btn-sm" onclick="shareExpenseWhatsApp()">📲 WhatsApp</button>
+          </div>
+        </div>
+        <div id="expenseList" class="item-list"></div>
+      </div>
+    </section>
+
+    <!-- 3. काउंटर बिलिंग डेस्क -->
+    <section class="ledger-box">
+      <div class="trigger-row" onclick="toggleDrawer('billingDrawer', 'billToggleBtn')">
+        <div class="trigger-info">
+          <span style="font-size:20px;">🛒</span>
+          <div>
+            <h3>काउंटर बिलिंग डेस्क</h3>
+            <small>क्रिप्टोग्राफ़िक इनवॉइस व PoP जनरेटर</small>
+          </div>
+        </div>
+        <button id="billToggleBtn" class="pill-btn">बिलिंग खोलें 📂</button>
+      </div>
+
+      <div id="billingDrawer" class="drawer-content">
+        <div class="grid-2" style="margin-bottom:8px;">
+          <input type="text" id="billCustName" class="input" placeholder="ग्राहक नाम (उदा. नकद)">
+          <input type="tel" id="billCustPhone" class="input" maxlength="10" placeholder="WhatsApp नंबर">
+        </div>
+        <table class="bill-table">
+          <thead>
+            <tr>
+              <th style="width:38%;">सामान</th>
+              <th style="width:16%; text-align:center;">मात्रा</th>
+              <th style="width:18%; text-align:center;">इकाई</th>
+              <th style="width:28%; text-align:right;">दर (₹)</th>
+            </tr>
+          </thead>
+          <tbody id="cartTableBody"></tbody>
+        </table>
+        <button class="btn-dashed" onclick="addCartRow()">＋ नया सामान जोड़ें</button>
+        <div class="summary-box">
+          <div class="summary-line"><span>उप-योग:</span><strong id="cartSubtotal">₹0.00</strong></div>
+          <div class="summary-line">
+            <span>छूट (Discount):</span>
+            <div style="display:flex; align-items:center; gap:4px;">
+              <span>₹</span>
+              <input type="number" id="cartDiscount" value="0" min="0" oninput="recalcCart()" style="width:65px; height:26px; border:1px solid var(--border); border-radius:6px; text-align:right; background:var(--bg-card); color:#fff; padding:2px;">
+            </div>
+          </div>
+          <div class="summary-line grand"><span>कुल देय राशि:</span><strong id="cartGrandTotal">₹0.00</strong></div>
+        </div>
+        <div class="grid-2" style="margin-top:10px;">
+          <button id="mineBillBtn" class="btn btn-gold" onclick="mineCounterInvoice()">⛏️ बिल माइन व प्रिंट करें</button>
+          <button class="btn btn-green" onclick="sendBillWhatsApp()">📲 WhatsApp बिल</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- खाता विस्तार दृश्य (Party Detail View) -->
+    <section id="partyDetailView" class="detail-card" style="display:none;">
+      <button class="back-link" onclick="closePartyDetail()">← वापस मुख्य गद्दी पर</button>
+      <div class="profile-header">
+        <div class="big-avatar" id="dtlAvatar">?</div>
+        <h2 id="dtlName">-</h2>
+        <div id="dtlPhone" style="font-size:12px; color:var(--text-muted); margin-top:2px;">-</div>
+        <div class="dtl-balance" id="dtlNetAmt">₹0</div>
+        <div id="dtlStatusLbl" style="font-size:12px; font-weight:700;">-</div>
+      </div>
+      <div class="action-grid-2">
+        <button class="btn btn-red" onclick="openTxModal('OUT')">＋ उधार दिया (OUT)</button>
+        <button class="btn btn-green" onclick="openTxModal('IN')">✓ जमा मिला (IN)</button>
+      </div>
+      <div class="tools-grid">
+        <button class="tool-btn" onclick="openPartyQR()">▣ मर्चेंट QR</button>
+        <button class="tool-btn" onclick="printPartyStatement()">🖨 पर्ची प्रिंट</button>
+        <button class="tool-btn" onclick="sendPartyReminderWhatsApp()">💬 WhatsApp</button>
+        <button class="tool-btn" onclick="editPartyInfo()">✏️ एडिट</button>
+      </div>
+      <div class="history-title">ऑडिट लेज़र (क्रिप्टोग्राफ़िक ब्लॉक्स)</div>
+      <div id="partyTxHistory" class="item-list"></div>
+    </section>
+  </div>
+
+  <!-- फ़्लोटिंग मैस्कॉट व ऐड बटन -->
+  <div class="mascot-wrap">
+    <div id="mascotBubble" class="mascot-bubble">नमस्ते मालिक! 🙏</div>
+    <div class="mascot-container" onclick="openGameModal()">
+      <div class="mascot-face">🐉</div>
+      <div id="mascotMuteBtn" class="mascot-mute" onclick="toggleMascotMute(event)">🔊</div>
+    </div>
+  </div>
+  <button id="fabBtn" class="fab" onclick="openAddPartyModal()">＋ नया खाता</button>
+
+  <!-- ==================== मॉडल्स ==================== -->
+  <!-- 1. नया खाता मॉडल -->
+  <div class="modal" id="addPartyModal"><div class="modal-box">
+    <h3>नया खाता जोड़ें</h3>
+    <div class="tab-grid" style="margin-bottom:10px;">
+      <label class="tab-btn" style="text-align:center;"><input type="radio" name="newPartyType" value="customer" checked> ग्राहक</label>
+      <label class="tab-btn" style="text-align:center;"><input type="radio" name="newPartyType" value="supplier"> व्यापारी भाई</label>
+    </div>
+    <input type="text" id="newPartyName" class="input" placeholder="नाम (व्यक्ति या फर्म)">
+    <input type="tel" id="newPartyPhone" class="input" maxlength="10" placeholder="10-अंकीय मोबाइल नंबर">
+    <div class="grid-2" style="margin-top:10px;">
+      <button class="btn btn-dark" onclick="closeModal('addPartyModal')">रद्द करें</button>
+      <button class="btn btn-gold" onclick="saveNewParty()">सुरक्षित करें</button>
+    </div>
+  </div></div>
+
+  <!-- 2. लेन-देन माइनिंग मॉडल -->
+  <div class="modal" id="txModal"><div class="modal-box">
+    <h3 id="txModalTitle">लेज़र प्रविष्टि माइन करें</h3>
+    <input type="number" id="txAmount" class="input" placeholder="राशि (₹)" min="1" step="any">
+    <input type="text" id="txNote" class="input" placeholder="विवरण (उदा. 50kg चीनी)">
+    <input type="text" id="txPopRef" class="input" placeholder="Proof of Payment (UTR / बिल नं / कैश)">
+    <div class="grid-2" style="margin-top:10px;">
+      <button class="btn btn-dark" onclick="closeModal('txModal')">रद्द करें</button>
+      <button id="txMineSubmitBtn" class="btn btn-gold" onclick="minePartyTx()">⛏️ माइन और दर्ज करें</button>
+    </div>
+  </div></div>
+
+  <!-- 3. भूल सुधार (Contra Entry) मॉडल -->
+  <div class="modal" id="contraModal"><div class="modal-box">
+    <h3>भूल सुधार (Contra Reversal Engine)</h3>
+    <p style="font-size:11px; color:var(--text-muted); margin-bottom:8px;">ब्लॉकचेन में पिछला डेटा मिटाया नहीं जाता। यह मूल ब्लॉक का विपरीत (रिवर्सल) ब्लॉक माइन करेगा।</p>
+    <input type="hidden" id="contraBlockIndex">
+    <input type="text" id="contraBlockDesc" class="input" readonly style="opacity:0.7;">
+    <input type="number" id="contraNewAmount" class="input" placeholder="सही संशोधित राशि (₹) [0 दर्ज करने पर पूर्ण निरस्त]" min="0" step="any">
+    <div class="grid-2" style="margin-top:10px;">
+      <button class="btn btn-dark" onclick="closeModal('contraModal')">रद्द करें</button>
+      <button id="contraSubmitBtn" class="btn btn-gold" onclick="executeContraReversal()">सुधार ब्लॉक माइन करें</button>
+    </div>
+  </div></div>
+
+  <!-- 4. सेटिंग्स मॉडल -->
+  <div class="modal" id="settingsModal"><div class="modal-box">
+    <h3>दुकान सेटिंग्स व डेटा बैकअप</h3>
+    <div class="form-group"><label>दुकान का नाम</label><input type="text" id="setShopName" class="input"></div>
+    <div class="form-group"><label>दुकानदार का नाम</label><input type="text" id="setMerchantName" class="input"></div>
+    <div class="form-group"><label>संपर्क फ़ोन</label><input type="tel" id="setShopPhone" class="input"></div>
+    <div class="form-group"><label>मर्चेंट UPI ID</label><input type="text" id="setShopUpi" class="input"></div>
+    <div class="grid-2" style="margin-top:10px;">
+      <button class="btn btn-gold" onclick="downloadBackupJSON()">📥 JSON बैकअप</button>
+      <button class="btn btn-dark" onclick="triggerRestoreJSON()">📤 रीस्टोर</button>
+    </div>
+    <input type="file" id="jsonFileInput" accept=".json" style="display:none;" onchange="handleRestoreFile(event)">
+    <div class="grid-2" style="margin-top:12px;">
+      <button class="btn btn-dark" onclick="closeModal('settingsModal')">बंद करें</button>
+      <button class="btn btn-green" onclick="saveSettings()">सेव करें</button>
+    </div>
+  </div></div>
+
+  <!-- 5. मर्चेंट QR मॉडल -->
+  <div class="modal" id="qrModal"><div class="modal-box" style="text-align:center;">
+    <h3 id="qrModalTitle" style="color:var(--gold);">दुकान QR कोड</h3>
+    <div class="qr-wrap"><div id="qrCanvasTarget"></div></div>
+    <div id="qrModalUpi" style="font-size:12px; color:var(--text-muted); margin-top:6px;">UPI: -</div>
+    <button class="btn btn-dark btn-full" style="margin-top:12px;" onclick="closeModal('qrModal')">बंद करें</button>
+  </div></div>
+
+  <!-- 6. गेम / बैठक मॉडल -->
+  <div class="modal" id="gameModal"><div class="modal-box">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+      <h3>मुंशी जी की बैठक</h3>
+      <div class="vault-badge">🪙 <span id="gameModalVault">0.00</span></div>
+    </div>
+    <div class="grid-2">
+      <button class="btn-fun" style="background:#fffbeb; border:1px solid #fde68a; color:#b45309;" onclick="feedChai()">
+        <span style="font-size:24px;">☕</span>चाय पिलाओ (<span id="cntChai">0</span>)
+      </button>
+      <button class="btn-fun" style="background:#fff1f2; border:1px solid #fecdd3; color:#e11d48;" onclick="hitKutai()">
+        <span style="font-size:24px;">🩴</span>कुटाई करो (<span id="cntKutai">0</span>)
+      </button>
+    </div>
+    <button class="btn btn-dark btn-full" style="margin-top:14px;" onclick="closeModal('gameModal')">वापस गद्दी पर जाएँ</button>
+  </div></div>
+
+  <!-- यूनिवर्सल 1-पेज प्रिंट कंटेनर -->
+  <div id="universalPrintArea"></div>
+  <div id="toast" class="toast"></div>
+
+  <!-- भाग 3 (जावास्क्रिप्ट) यहाँ जुड़ेगा -->
+</body>
+</html>
+<style>
+  :root {
+    --bg-body: #0b0f19;
+    --bg-card: #151d30;
+    --bg-input: #0c1222;
+    --border: #24304f;
+    --gold: #f59e0b;
+    --green: #10b981;
+    --red: #f43f5e;
+    --text: #f8fafc;
+    --text-muted: #94a3b8;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+  body { background: var(--bg-body); color: var(--text); padding: 12px; display: flex; justify-content: center; min-height: 100vh; padding-bottom: 90px; }
+  .app { width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 12px; }
+
+  #splashScreen { position: fixed; inset: 0; background: linear-gradient(135deg, #0b0f19, #151d30); z-index: 99999; display: flex; align-items: center; justify-content: center; transition: opacity 0.4s ease; }
+
+  /* हेडर */
+  .header { background: var(--bg-card); border: 1px solid var(--border); padding: 12px 14px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; }
+  .brand { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+  .logo-box { width: 42px; height: 42px; border-radius: 12px; background: #fff; display: grid; place-items: center; font-size: 22px; border: 2px solid var(--gold); }
+  .brand h1 { font-size: 16px; color: var(--gold); font-weight: 800; }
+  .brand small { font-size: 10.5px; color: var(--text-muted); display: block; margin-top: 1px; }
+  .header-right { display: flex; align-items: center; gap: 8px; }
+  .vault-badge { background: rgba(245, 158, 11, 0.15); border: 1px solid var(--gold); color: #fde047; padding: 5px 10px; border-radius: 12px; font-size: 11px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+  .icon-btn { width: 36px; height: 36px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-input); color: #fff; cursor: pointer; }
+
+  /* स्टेटस व बैलेंस कार्ड */
+  .chain-badge { background: rgba(16, 185, 129, 0.1); border: 1px solid var(--green); color: var(--green); padding: 7px 12px; border-radius: 12px; font-size: 11px; text-align: center; font-weight: 700; }
+  .chain-corrupt { background: rgba(244, 63, 94, 0.15); border-color: var(--red); color: var(--red); }
+  .balance-card { background: linear-gradient(135deg, #172033, #0b0f19); border: 1px solid var(--border); border-radius: 18px; padding: 16px; text-align: center; }
+  .balance-title { font-size: 10.5px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+  .balance-val { font-size: 28px; font-weight: 800; margin: 4px 0 10px; }
+  .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .stat-box { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); padding: 8px; border-radius: 10px; font-size: 11.5px; }
+  .text-green { color: var(--green); }
+  .text-red { color: var(--red); }
+
+  /* लेज़र बॉक्स एवं ड्रॉअर */
+  .ledger-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+  .trigger-row { padding: 14px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+  .trigger-info { display: flex; align-items: center; gap: 10px; }
+  .trigger-info h3 { font-size: 14px; font-weight: 800; }
+  .trigger-info small { font-size: 10.5px; color: var(--text-muted); }
+  .pill-btn { border: 0; background: var(--border); color: #fff; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; }
+  .pill-btn-sm { border: 0; background: rgba(255,255,255,0.08); color: #fff; padding: 3px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; cursor: pointer; }
+  .drawer-content { display: none; padding: 12px 14px; border-top: 1px solid var(--border); background: rgba(0,0,0,0.15); }
+
+  /* इनपुट्स एवं बटन */
+  .input { width: 100%; height: 40px; background: var(--bg-input); border: 1px solid var(--border); border-radius: 8px; color: #fff; padding: 0 10px; font-size: 12.5px; outline: 0; margin-bottom: 8px; }
+  .input:focus { border-color: var(--gold); }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .btn { padding: 10px 14px; border-radius: 10px; font-size: 12px; font-weight: 800; border: 0; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+  .btn-gold { background: var(--gold); color: #000; }
+  .btn-dark { background: var(--border); color: #fff; }
+  .btn-green { background: var(--green); color: #fff; }
+  .btn-red { background: var(--red); color: #fff; }
+  .btn-full { width: 100%; }
+  .btn-dashed { width: 100%; padding: 8px; border: 1px dashed var(--gold); background: rgba(245,158,11,0.05); color: var(--gold); border-radius: 8px; font-size: 11.5px; font-weight: 700; margin-top: 6px; cursor: pointer; }
+  .btn-fun { padding: 14px; border-radius: 14px; display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 11.5px; font-weight: 800; cursor: pointer; }
+
+  /* सूचियाँ एवं पंक्तियाँ */
+  .tab-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; background: var(--bg-input); padding: 4px; border-radius: 10px; margin-bottom: 8px; }
+  .tab-btn { border: 0; background: transparent; color: var(--text-muted); padding: 6px; border-radius: 7px; font-size: 11.5px; font-weight: 700; cursor: pointer; }
+  .tab-btn.active { background: var(--border); color: #fff; }
+  .item-list { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+  .list-item { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+  .list-left { display: flex; align-items: center; gap: 8px; }
+  .avatar-circle { width: 34px; height: 34px; border-radius: 10px; background: rgba(255,255,255,0.05); color: var(--gold); display: grid; place-items: center; font-weight: 800; font-size: 13px; }
+  .list-right { text-align: right; }
+  .tx-item { background: var(--bg-input); border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; display: flex; justify-content: space-between; align-items: center; font-size: 11.5px; }
+
+  /* बिलिंग टेबल */
+  .bill-table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 4px; }
+  .bill-table th { color: var(--text-muted); padding: 4px; text-align: left; border-bottom: 1px solid var(--border); }
+  .bill-table td { padding: 4px; }
+  .summary-box { background: var(--bg-input); border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; margin-top: 8px; font-size: 11.5px; }
+  .summary-line { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; }
+  .summary-line.grand { border-top: 1px solid var(--border); padding-top: 4px; margin-top: 4px; font-size: 14px; font-weight: 800; color: var(--green); }
+
+  /* विस्तार दृश्य (Detail Card) */
+  .detail-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 18px; padding: 16px; }
+  .back-link { border: 0; background: none; color: var(--gold); font-size: 12px; font-weight: 700; cursor: pointer; margin-bottom: 10px; }
+  .profile-header { text-align: center; margin-bottom: 14px; }
+  .big-avatar { width: 52px; height: 52px; border-radius: 16px; background: rgba(255,255,255,0.05); color: var(--gold); display: grid; place-items: center; font-size: 20px; font-weight: 800; margin: 0 auto 6px; }
+  .dtl-balance { font-size: 26px; font-weight: 800; margin: 4px 0 2px; }
+  .action-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+  .tools-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 14px; }
+  .tool-btn { border: 1px solid var(--border); background: var(--bg-input); color: #fff; padding: 8px 4px; border-radius: 8px; font-size: 10px; font-weight: 700; cursor: pointer; }
+  .history-title { font-size: 12.5px; font-weight: 800; margin-bottom: 8px; color: var(--gold); }
+
+  /* फ़्लोटिंग मैस्कॉट एवं FAB */
+  .fab { position: fixed; right: 18px; bottom: 20px; height: 50px; padding: 0 20px; border-radius: 25px; background: var(--gold); color: #000; font-size: 13px; font-weight: 800; border: 0; box-shadow: 0 8px 24px rgba(245,158,11,0.3); cursor: pointer; z-index: 80; }
+  .mascot-wrap { position: fixed; left: 18px; bottom: 20px; z-index: 80; display: flex; flex-direction: column; align-items: flex-start; pointer-events: none; }
+  .mascot-bubble { background: #fff; color: #000; padding: 6px 12px; border-radius: 12px 12px 12px 2px; font-size: 11px; font-weight: 800; margin-bottom: 6px; display: none; pointer-events: auto; }
+  .mascot-container { position: relative; pointer-events: auto; cursor: pointer; }
+  .mascot-face { width: 48px; height: 48px; border-radius: 50%; background: #e0f2fe; border: 2px solid var(--green); display: grid; place-items: center; font-size: 24px; }
+  .mascot-mute { position: absolute; top: -4px; right: -4px; width: 18px; height: 18px; border-radius: 50%; background: #000; color: #fff; font-size: 9px; display: grid; place-items: center; border: 1px solid #fff; }
+
+  /* मॉडल */
+  .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center; padding: 14px; }
+  .modal.show { display: flex; }
+  .modal-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 18px; width: 100%; max-width: 380px; }
+  .modal-box h3 { font-size: 15px; margin-bottom: 10px; color: var(--gold); }
+  .form-group { margin-bottom: 8px; }
+  .form-group label { font-size: 10.5px; color: var(--text-muted); display: block; margin-bottom: 3px; }
+  .qr-wrap { background: #fff; padding: 10px; border-radius: 12px; display: inline-block; margin: 10px auto; }
+  .toast { position: fixed; left: 50%; bottom: 80px; transform: translate(-50%, 20px); background: #fff; color: #000; padding: 8px 16px; border-radius: 20px; font-size: 11.5px; font-weight: 800; opacity: 0; pointer-events: none; transition: 0.25s; z-index: 2000; }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  /* 1-पेज यूनिवर्सल प्रिंट इंजन */
+  #universalPrintArea { display: none; }
+  @media print {
+    @page { margin: 4mm; size: auto; }
+    body { background: #fff !important; color: #000 !important; padding: 0 !important; }
+    .app, .fab, .mascot-wrap, .modal { display: none !important; }
+    #universalPrintArea { display: block !important; width: 100% !important; }
+    table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+    th, td { border: 1px solid #444; padding: 4px 6px; font-size: 11px; }
+    th { background: #eee; }
+    .paper-slip { width: 72mm; margin: 0 auto; font-family: monospace; font-size: 11px; }
+    .paper-slip table th, .paper-slip table td { border: none; border-bottom: 1px dashed #000; }
+  }
+</style>
+<script>
+// =========================================================
+// 1. शुद्ध SHA-256 एवं कैनोनिकल Proof-of-Work इंजन
+// =========================================================
+async function sha256(str) {
+  const buf = new TextEncoder().encode(str);
+  const hashBuf = await crypto.subtle.digest('SHA-256', buf);
+  return Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// क्रमबद्ध JSON पेलोड (Deterministic Serialization)
+function getCanonicalBlockPayload(block, nonce) {
+  const d = block.data;
+  const canonicalData = {
+    amount: Number(d.amount).toFixed(2),
+    note: d.note || "",
+    partyId: d.partyId || "",
+    partyName: d.partyName || "",
+    pop: d.pop || "",
+    tag: d.tag || "",
+    type: d.type || ""
+  };
+  return JSON.stringify({
+    index: block.index,
+    timestamp: block.timestamp,
+    prevHash: block.prevHash,
+    data: canonicalData,
+    nonce: nonce
+  });
+}
+
+async function calculateBlockHash(block) {
+  return await sha256(getCanonicalBlockPayload(block, block.nonce));
+}
+
+// नॉन-ब्लॉकिंग प्रूफ-ऑफ-वर्क माइनर ("00" = 8-बिट्स लक्षित डिफिकल्टी)
+async function mineBlock(newBlock, targetDiff = "00") {
+  let nonce = 0;
+  while (true) {
+    const payload = getCanonicalBlockPayload(newBlock, nonce);
+    const hash = await sha256(payload);
+    if (hash.startsWith(targetDiff)) {
+      newBlock.nonce = nonce;
+      newBlock.hash = hash;
+      return newBlock;
+    }
+    nonce++;
+    if (nonce % 400 === 0) {
+      await new Promise(r => setTimeout(r, 0)); // UI को थ्रेड फ्रीज होने से बचाता है
+    }
+  }
+}
+
+// =========================================================
+// 2. स्टोरेज एवं प्राथमिक स्टेट (Single Source Setup)
+// =========================================================
+const BK_KEY = "CHUPAKABRA_BLOCKCHAIN";
+const PARTIES_KEY = "CHUPAKABRA_PARTIES";
+const PROFILE_KEY = "CHUPAKABRA_PROFILE";
+const EXP_KEY = "CHUPAKABRA_EXPENSES";
+const REACTIONS_KEY = "CHUPAKABRA_REACTIONS";
+
+function safeSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
+function safeGet(k, fb) {
+  try {
+    const r = localStorage.getItem(k);
+    return r ? JSON.parse(r) : fb;
+  } catch(e) { return fb; }
+}
+
+let blockchain = safeGet(BK_KEY, []);
+let parties = safeGet(PARTIES_KEY, []); // केवल प्रोफ़ाइल विवरण (ID, Name, Phone, Type)
+let expenses = safeGet(EXP_KEY, []);
+let profile = safeGet(PROFILE_KEY, {
+  shopName: "मेरी दुकान का खाता",
+  merchantName: "सत्यप्रकाश सिंह",
+  phone: "9876543210",
+  upi: "9818589869@ptyes"
+});
+let reactions = safeGet(REAC_KEY = REACTIONS_KEY, { chai: 12, kutai: 2 });
+
+let currentPartyTab = "customer";
+let activePartyId = null;
+let currentTxDirection = "OUT";
+let isMuted = localStorage.getItem("chupaMute") === "1";
+
+let cart = [
+  { name: "सरसों तेल", qty: 2, unit: "लीटर", rate: 140 },
+  { name: "गेहूँ आटा", qty: 5, unit: "किलो", rate: 35 }
+];
+
+// =========================================================
+// 3. जेनेसिस और अखंडता जांच (Integrity Check)
+// =========================================================
+async function initBlockchain() {
+  if (blockchain.length === 0) {
+    const genesis = {
+      index: 0,
+      timestamp: new Date().toISOString(),
+      prevHash: "0000000000000000000000000000000000000000000000000000000000000000",
+      data: { partyId: "SYSTEM", partyName: "GENESIS", amount: "0.00", type: "SYSTEM", tag: "GENESIS", pop: "000000", note: "GENESIS_ROOT" },
+      nonce: 0,
+      hash: ""
+    };
+    genesis.hash = await calculateBlockHash(genesis);
+    blockchain.push(genesis);
+    safeSet(BK_KEY, blockchain);
+  }
+  await verifyBlockchainIntegrity();
+}
+
+async function verifyBlockchainIntegrity() {
+  const box = document.getElementById("chainStatusBox");
+  let isValid = true;
+
+  for (let i = 1; i < blockchain.length; i++) {
+    const cur = blockchain[i];
+    const prev = blockchain[i - 1];
+    if (cur.prevHash !== prev.hash || cur.hash !== await calculateBlockHash(cur)) {
+      isValid = false;
+      if (box) {
+        box.className = "chain-badge chain-corrupt";
+        box.innerText = `🚨 ब्लॉक #${cur.index} में छेड़छाड़ पकड़ी गई! लेज़र अमान्य है।`;
+      }
+      break;
+    }
+  }
+
+  if (isValid && box) {
+    box.className = "chain-badge";
+    box.innerText = "✓ ब्लॉकचेन लेज़र सुरक्षित (0% छेड़छाड़ • PoW Verified)";
+  }
+  return isValid;
+}
+
+// =========================================================
+// 4. सिंगल सोर्स से लाइव गणना (Pure Computed State)
+// =========================================================
+
+// किसी भी खाते का शुद्ध शेष सीधे लेज़र से जोड़ना
+function getPartyBalance(partyId) {
+  return blockchain
+    .filter(b => b.index > 0 && b.data && b.data.partyId === partyId)
+    .reduce((bal, b) => {
+      const amt = parseFloat(b.data.amount) || 0;
+      return b.data.type === "OUT" ? bal + amt : bal - amt;
+    }, 0);
+}
+
+// दुकान का शुद्ध बैलेंस और आंकड़े
+function refreshLedgerComputations() {
+  let netBalance = 0;
+  let totalOut = 0;
+  let totalIn = 0;
+
+  // सभी सक्रिय पक्षों के लेज़र का योग
+  parties.forEach(p => {
+    const b = getPartyBalance(p.id);
+    if (b > 0) totalOut += b;
+    else if (b < 0) totalIn += Math.abs(b);
+  });
+
+  netBalance = totalOut - totalIn;
+  const netEl = document.getElementById("netBalanceVal");
+  if (netBalance > 0) {
+    netEl.innerText = `₹${netBalance.toLocaleString('en-IN')} (कुल बाज़ार उधार)`;
+    netEl.className = "balance-val text-red";
+  } else if (netBalance < 0) {
+    netEl.innerText = `₹${Math.abs(netBalance).toLocaleString('en-IN')} (कुल जमा शेष)`;
+    netEl.className = "balance-val text-green";
+  } else {
+    netEl.innerText = "₹0 (हिसाब बराबर)";
+    netEl.className = "balance-val";
+  }
+
+  document.getElementById("totOutVal").innerText = `₹${totalOut.toLocaleString('en-IN')}`;
+  document.getElementById("totInVal").innerText = `₹${totalIn.toLocaleString('en-IN')}`;
+
+  // बरकत तिजोरी: कुल मान्य गैर-रिवर्सल ब्लॉक्स × 0.05
+  computeVaultBalance();
+}
+
+function computeVaultBalance() {
+  const validBlocks = blockchain.filter(b => b.index > 0 && b.data && b.data.tag !== "CONTRA_REV");
+  const coins = (validBlocks.length * 0.05).toFixed(2);
+  document.getElementById("vaultBalance").innerText = coins;
+  const gb = document.getElementById("gameModalVault");
+  if (gb) gb.innerText = coins;
+}
+
+// =========================================================
+// 5. ड्रॉअर्स, नेविगेशन व पार्टी प्रबंधन
+// =========================================================
+function toggleDrawer(drawerId, btnId) {
+  const d = document.getElementById(drawerId);
+  const b = document.getElementById(btnId);
+  const isHidden = (d.style.display === "none" || d.style.display === "");
+  d.style.display = isHidden ? "block" : "none";
+  b.innerText = isHidden ? "समेटें 📁" : "खोलें 📂";
+
+  if (isHidden) {
+    if (drawerId === "partyDrawer") renderParties();
+    if (drawerId === "expenseDrawer") renderExpenses();
+    if (drawerId === "billingDrawer") renderCart();
+  }
+}
+
+function switchPartyMode(mode) {
+  currentPartyTab = mode;
+  document.getElementById("tabCust").className = "tab-btn " + (mode === "customer" ? "active" : "");
+  document.getElementById("tabSupp").className = "tab-btn " + (mode === "supplier" ? "active" : "");
+  renderParties();
+}
+
+function renderParties() {
+  const q = (document.getElementById("partySearch").value || "").toLowerCase().trim();
+  const list = document.getElementById("partyList");
+  const filtered = parties.filter(p => {
+    return p.type === currentPartyTab && (p.name.toLowerCase().includes(q) || p.phone.includes(q));
+  });
+
+  document.getElementById("partyCountTxt").innerText = `${parties.length} खाते दर्ज`;
+  list.innerHTML = "";
+
+  if (!filtered.length) {
+    list.innerHTML = `<div style="text-align:center; padding:15px; font-size:12px; color:var(--text-muted);">कोई खाता नहीं मिला।</div>`;
+    return;
+  }
+
+  filtered.forEach(p => {
+    const bal = getPartyBalance(p.id);
+    const isOut = bal > 0;
+    const row = document.createElement("div");
+    row.className = "list-item";
+    row.onclick = () => openPartyDetail(p.id);
+    row.innerHTML = `
+      <div class="list-left">
+        <div class="avatar-circle">${escapeHtml(p.name.charAt(0))}</div>
+        <div>
+          <b style="font-size:13px;">${escapeHtml(p.name)}</b>
+          <div style="font-size:10px; color:var(--text-muted);">📞 ${escapeHtml(p.phone)}</div>
+        </div>
+      </div>
+      <div class="list-right">
+        <b class="${isOut ? 'text-red' : (bal < 0 ? 'text-green' : '')}" style="font-size:13px;">
+          ₹${Math.abs(bal).toLocaleString('en-IN')}
+        </b>
+        <div style="font-size:9.5px; font-weight:700;" class="${isOut ? 'text-red' : (bal < 0 ? 'text-green' : '')}">
+          ${isOut ? 'लेना है' : (bal < 0 ? 'देना है' : 'हिसाब 0')}
+        </div>
+      </div>
+    `;
+    list.appendChild(row);
+  });
+}
+
+function openAddPartyModal() {
+  document.getElementById("newPartyName").value = "";
+  document.getElementById("newPartyPhone").value = "";
+  openModal("addPartyModal");
+}
+
+function saveNewParty() {
+  const name = document.getElementById("newPartyName").value.trim();
+  const phone = document.getElementById("newPartyPhone").value.trim();
+  if (!name) { toast("कृपया नाम दर्ज करें"); return; }
+  if (!/^\d{10}$/.test(phone)) { toast("10-अंकीय फ़ोन नंबर दर्ज करें"); return; }
+
+  const type = document.querySelector('input[name="newPartyType"]:checked').value;
+  const newParty = { id: "P_" + Date.now(), name, phone, type };
+
+  parties.push(newParty);
+  safeSet(PARTIES_KEY, parties);
+  closeModal("addPartyModal");
+  renderParties();
+  refreshLedgerComputations();
+  toast("नया खाता खुल गया ✓");
+  speakMunshi(`${name} का नया खाता खुल गया!`);
+}
+
+// =========================================================
+// 6. खाता विस्तार व्यू एवं लेन-देन माइनिंग (Transaction Mine Flow)
+// =========================================================
+function openPartyDetail(partyId) {
+  activePartyId = partyId;
+  const p = parties.find(item => item.id === partyId);
+  if (!p) return;
+
+  document.getElementById("dtlAvatar").innerText = p.name.charAt(0);
+  document.getElementById("dtlName").innerText = p.name;
+  document.getElementById("dtlPhone").innerText = `📞 ${p.phone} (${p.type === 'customer' ? 'ग्राहक' : 'व्यापारी'})`;
+
+  updatePartyDetailView();
+  document.getElementById("partyDetailView").style.display = "block";
+  document.getElementById("partyDetailView").scrollIntoView({ behavior: 'smooth' });
+}
+
+function closePartyDetail() {
+  document.getElementById("partyDetailView").style.display = "none";
+  activePartyId = null;
+  renderParties();
+}
+
+function updatePartyDetailView() {
+  const p = parties.find(item => item.id === activePartyId);
+  if (!p) return;
+
+  const bal = getPartyBalance(p.id);
+  const netEl = document.getElementById("dtlNetAmt");
+  const lblEl = document.getElementById("dtlStatusLbl");
+
+  if (bal > 0) {
+    netEl.innerText = `₹${bal.toLocaleString('en-IN')}`;
+    netEl.className = "dtl-balance text-red";
+    lblEl.innerText = "आपको लेना है (उधार बाकी)";
+    lblEl.className = "text-red";
+  } else if (bal < 0) {
+    netEl.innerText = `₹${Math.abs(bal).toLocaleString('en-IN')}`;
+    netEl.className = "dtl-balance text-green";
+    lblEl.innerText = "आपको देना है (जमा शेष)";
+    lblEl.className = "text-green";
+  } else {
+    netEl.innerText = "₹0";
+    netEl.className = "dtl-balance";
+    lblEl.innerText = "हिसाब बराबर है";
+    lblEl.className = "";
+  }
+
+  // सीधे ब्लॉकचेन से फ़िल्टर किया गया इतिहास
+  const historyList = document.getElementById("partyTxHistory");
+  historyList.innerHTML = "";
+
+  const partyBlocks = blockchain.filter(b => b.index > 0 && b.data && b.data.partyId === p.id);
+  if (!partyBlocks.length) {
+    historyList.innerHTML = `<div style="text-align:center; padding:15px; font-size:11px; color:var(--text-muted);">कोई लेन-देन दर्ज नहीं है</div>`;
+    return;
+  }
+
+  partyBlocks.slice().reverse().forEach(b => {
+    const isOut = b.data.type === "OUT";
+    const dateStr = new Date(b.timestamp).toLocaleDateString('hi-IN', { day:'2-digit', month:'short' });
+    const row = document.createElement("div");
+    row.className = "tx-item";
+    row.innerHTML = `
+      <div>
+        <b>${escapeHtml(b.data.note || (isOut ? 'उधार' : 'जमा'))}</b>
+        <div style="font-size:9.5px; color:var(--text-muted);">${dateStr} • ब्लॉक #${b.index}</div>
+        <div style="font-size:9px; font-family:monospace; color:var(--gold);">Hash: ${b.hash.slice(0, 10)}...</div>
+      </div>
+      <div style="text-align:right;">
+        <b class="${isOut ? 'text-red' : 'text-green'}" style="font-size:13px;">${isOut ? '+' : '-'}₹${Number(b.data.amount).toLocaleString('en-IN')}</b>
+        <div style="margin-top:2px;">
+          <button class="pill-btn-sm" onclick="openContraModal(${b.index})">सुधार ⚖️</button>
+        </div>
+      </div>
+    `;
+    historyList.appendChild(row);
+  });
+}
+
+function openTxModal(direction) {
+  currentTxDirection = direction;
+  document.getElementById("txModalTitle").innerText = (direction === "OUT") ? "उधार दिया (OUT) — ब्लॉक माइन करें" : "जमा मिला (IN) — ब्लॉक माइन करें";
+  document.getElementById("txAmount").value = "";
+  document.getElementById("txNote").value = "";
+  document.getElementById("txPopRef").value = "";
+  openModal("txModal");
+}
+
+async function minePartyTx() {
+  const amt = parseFloat(document.getElementById("txAmount").value);
+  const note = document.getElementById("txNote").value.trim();
+  const pop = document.getElementById("txPopRef").value.trim() || `RECEIPT_${Date.now()}`;
+
+  if (isNaN(amt) || amt <= 0) { toast("कृपया मान्य राशि दर्ज करें"); return; }
+  const p = parties.find(item => item.id === activePartyId);
+  if (!p) return;
+
+  const btn = document.getElementById("txMineSubmitBtn");
+  btn.disabled = true;
+  btn.innerText = "⛏️ ब्लॉक माइन हो रहा है...";
+
+  const lastBlock = blockchain[blockchain.length - 1];
+  let newBlock = {
+    index: blockchain.length,
+    timestamp: new Date().toISOString(),
+    prevHash: lastBlock.hash,
+    data: {
+      partyId: p.id,
+      partyName: p.name,
+      amount: amt.toFixed(2),
+      type: currentTxDirection,
+      tag: "CUSTOMER_TX",
+      pop: pop,
+      note: note || (currentTxDirection === "OUT" ? "उधार" : "जमा मिला")
+    },
+    nonce: 0,
+    hash: ""
+  };
+
+  newBlock = await mineBlock(newBlock, "00");
+  blockchain.push(newBlock);
+  safeSet(BK_KEY, blockchain);
+
+  btn.disabled = false;
+  btn.innerText = "⛏️ माइन और दर्ज करें";
+  closeModal("txModal");
+
+  updatePartyDetailView();
+  refreshLedgerComputations();
+  speakMunshi(`${p.name} का ₹${amt} लेज़र में जुड़ गया!`);
+  await verifyBlockchainIntegrity();
+}
+
+// =========================================================
+// 7. भूल सुधार (Contra Entry Engine)
+// =========================================================
+function openContraModal(blockIndex) {
+  const b = blockchain.find(item => item.index === blockIndex);
+  if (!b) return;
+  document.getElementById("contraBlockIndex").value = blockIndex;
+  document.getElementById("contraBlockDesc").value = `ब्लॉक #${b.index}: ${b.data.partyName} (₹${b.data.amount} ${b.data.type})`;
+  document.getElementById("contraNewAmount").value = "";
+  openModal("contraModal");
+}
+
+async function executeContraReversal() {
+  const bIndex = parseInt(document.getElementById("contraBlockIndex").value, 10);
+  const orig = blockchain.find(item => item.index === bIndex);
+  if (!orig) { toast("मूल ब्लॉक नहीं मिला!"); return; }
+
+  const newAmt = parseFloat(document.getElementById("contraNewAmount").value);
+  if (isNaN(newAmt) || newAmt < 0) { toast("कृपया मान्य राशि भरें"); return; }
+
+  const btn = document.getElementById("contraSubmitBtn");
+  btn.disabled = true;
+  btn.innerText = "⛏️ 1/2: रिवर्सल ब्लॉक माइन हो रहा है...";
+
+  // 1. कंट्रा रिवर्सल ब्लॉक
+  const revType = (orig.data.type === "OUT") ? "IN" : "OUT";
+  let last = blockchain[blockchain.length - 1];
+  let revBlock = {
+    index: blockchain.length,
+    timestamp: new Date().toISOString(),
+    prevHash: last.hash,
+    data: {
+      partyId: orig.data.partyId,
+      partyName: orig.data.partyName,
+      amount: Number(orig.data.amount).toFixed(2),
+      type: revType,
+      tag: "CONTRA_REV",
+      pop: `REV_FOR_${bIndex}`,
+      note: `ब्लॉक #${bIndex} का निरस्तीकरण`
+    },
+    nonce: 0,
+    hash: ""
+  };
+  revBlock = await mineBlock(revBlock, "00");
+  blockchain.push(revBlock);
+
+  // 2. नया संशोधित ब्लॉक (यदि राशि > 0)
+  if (newAmt > 0) {
+    btn.innerText = "⛏️ 2/2: सही मान माइन हो रहा है...";
+    last = blockchain[blockchain.length - 1];
+    let correctBlock = {
+      index: blockchain.length,
+      timestamp: new Date().toISOString(),
+      prevHash: last.hash,
+      data: {
+        partyId: orig.data.partyId,
+        partyName: orig.data.partyName,
+        amount: newAmt.toFixed(2),
+        type: orig.data.type,
+        tag: "CUSTOMER_TX",
+        pop: `CORR_FOR_${bIndex}`,
+        note: `ब्लॉक #${bIndex} का संशोधित मान`
+      },
+      nonce: 0,
+      hash: ""
+    };
+    correctBlock = await mineBlock(correctBlock, "00");
+    blockchain.push(correctBlock);
+  }
+
+  safeSet(BK_KEY, blockchain);
+  btn.disabled = false;
+  btn.innerText = "सुधार ब्लॉक माइन करें";
+  closeModal("contraModal");
+
+  updatePartyDetailView();
+  refreshLedgerComputations();
+  speakMunshi("डबल-एंट्री रिवर्सल ब्लॉकचेन में दर्ज हो गई!");
+  await verifyBlockchainIntegrity();
+}
+
+// =========================================================
+// 8. गद्दी रोज़नामचा (Expenses)
+// =========================================================
+async function mineExpense() {
+  const amt = parseFloat(document.getElementById("expAmount").value);
+  const cat = document.getElementById("expCategory").value;
+  const note = document.getElementById("expNote").value.trim();
+  const cDate = document.getElementById("expDate").value;
+
+  if (isNaN(amt) || amt <= 0) { toast("कृपया खर्च की राशि भरें"); return; }
+  const btn = document.getElementById("mineExpBtn");
+  btn.disabled = true;
+  btn.innerText = "⛏️ खर्च माइन हो रहा है...";
+
+  const last = blockchain[blockchain.length - 1];
+  let expBlock = {
+    index: blockchain.length,
+    timestamp: new Date().toISOString(),
+    prevHash: last.hash,
+    data: {
+      partyId: "EXPENSE_ACC",
+      partyName: cat,
+      amount: amt.toFixed(2),
+      type: "OUT",
+      tag: "EXPENSE",
+      pop: `EXP_${Date.now()}`,
+      note: note || cat
+    },
+    nonce: 0,
+    hash: ""
+  };
+
+  expBlock = await mineBlock(expBlock, "00");
+  blockchain.push(expBlock);
+  safeSet(BK_KEY, blockchain);
+
+  const dObj = cDate ? new Date(cDate + "T12:00:00") : new Date();
+  const dStr = new Intl.DateTimeFormat("hi-IN", { day:"numeric", month:"short", year:"numeric" }).format(dObj);
+  const mKey = `${dObj.getMonth() + 1}-${dObj.getFullYear()}`;
+
+  expenses.unshift({
+    id: Date.now(),
+    amount: amt,
+    category: cat,
+    note: note || cat,
+    date: dStr,
+    monthKey: mKey,
+    blockHash: expBlock.hash
+  });
+  safeSet(EXP_KEY, expenses);
+
+  document.getElementById("expAmount").value = "";
+  document.getElementById("expNote").value = "";
+  btn.disabled = false;
+  btn.innerText = "⛏️ खर्च ब्लॉक माइन करें";
+
+  renderExpenses();
+  refreshLedgerComputations();
+  toast("खर्च ब्लॉकचेन में दर्ज हुआ ✓");
+  speakMunshi(`₹${amt} का खर्च नोट हो गया!`);
+  await verifyBlockchainIntegrity();
+}
+
+function renderExpenses() {
+  const list = document.getElementById("expenseList");
+  const now = new Date();
+  const curKey = `${now.getMonth() + 1}-${now.getFullYear()}`;
+  let mTotal = 0;
+  expenses.forEach(e => { if (e.monthKey === curKey) mTotal += Number(e.amount || 0); });
+
+  document.getElementById("expSummaryTxt").innerText = `इस महीने: ₹${mTotal.toLocaleString('en-IN')}`;
+  list.innerHTML = "";
+  if (!expenses.length) {
+    list.innerHTML = `<div style="text-align:center; padding:15px; font-size:11px; color:var(--text-muted);">कोई खर्च दर्ज नहीं है</div>`;
+    return;
+  }
+
+  expenses.slice(0, 15).forEach(e => {
+    const row = document.createElement("div");
+    row.className = "tx-item";
+    row.innerHTML = `
+      <div>
+        <b>${escapeHtml(e.note)}</b> <span style="font-size:9.5px; background:rgba(245,158,11,0.1); color:var(--gold); padding:2px 5px; border-radius:4px;">${escapeHtml(e.category)}</span>
+        <div style="font-size:9px; color:var(--text-muted);">${e.date}</div>
+      </div>
+      <div style="color:var(--gold); font-weight:800; font-size:13px;">₹${Number(e.amount).toLocaleString('en-IN')}</div>
+    `;
+    list.appendChild(row);
+  });
+}
+
+function printExpenseSlip() {
+  const pArea = document.getElementById("universalPrintArea");
+  let total = 0, rows = "";
+  expenses.slice(0, 25).forEach((e, i) => {
+    total += Number(e.amount || 0);
+    rows += `<tr><td>${i+1}</td><td>${e.date}</td><td>${escapeHtml(e.note)}</td><td style="text-align:right;">₹${e.amount}</td></tr>`;
+  });
+  pArea.innerHTML = `
+    <div class="paper-slip">
+      <center>
+        <h3>${escapeHtml(profile.shopName)}</h3>
+        <p>गद्दी रोज़नामचा खर्च ब्योरा</p>
+      </center>
+      <table>
+        <thead><tr><th>#</th><th>दिनांक</th><th>विवरण</th><th style="text-align:right;">रकम</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <div style="text-align:right; font-weight:bold; margin-top:8px;">कुल खर्च: ₹${total.toFixed(2)}</div>
+    </div>
+  `;
+  setTimeout(() => window.print(), 250);
+}
+
+function shareExpenseWhatsApp() {
+  if (!expenses.length) { toast("कोई खर्च नहीं है!"); return; }
+  let msg = `*${profile.shopName} — रोज़नामचा खर्च*\n------------------\n`;
+  expenses.slice(0, 10).forEach((e, i) => { msg += `${i+1}. ${e.date} | ${e.note}: ₹${e.amount}\n`; });
+  window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+}
+
+// =========================================================
+// 9. बिलिंग डेस्क (Counter Invoicing)
+// =========================================================
+function renderCart() {
+  const tb = document.getElementById("cartTableBody");
+  tb.innerHTML = "";
+  cart.forEach((it, idx) => {
+    tb.innerHTML += `
+      <tr>
+        <td><input type="text" value="${escapeHtml(it.name)}" oninput="cart[${idx}].name=this.value" style="width:100%; height:26px; font-size:11px; background:var(--bg-input); border:1px solid var(--border); color:#fff; border-radius:4px; padding:2px 4px;"></td>
+        <td><input type="number" min="1" value="${it.qty}" oninput="cart[${idx}].qty=Number(this.value); recalcCart()" style="width:100%; height:26px; text-align:center; font-size:11px; background:var(--bg-input); border:1px solid var(--border); color:#fff; border-radius:4px;"></td>
+        <td>
+          <select onchange="cart[${idx}].unit=this.value" style="width:100%; height:26px; font-size:10px; background:var(--bg-input); border:1px solid var(--border); color:#fff; border-radius:4px;">
+            <option ${it.unit === 'लीटर' ? 'selected' : ''}>लीटर</option>
+            <option ${it.unit === 'किलो' ? 'selected' : ''}>किलो</option>
+            <option ${it.unit === 'पीस' ? 'selected' : ''}>पीस</option>
+            <option ${it.unit === 'पैकेट' ? 'selected' : ''}>पैकेट</option>
+          </select>
+        </td>
+        <td><input type="number" value="${it.rate}" oninput="cart[${idx}].rate=Number(this.value); recalcCart()" style="width:100%; height:26px; text-align:right; font-size:11px; background:var(--bg-input); border:1px solid var(--border); color:#fff; border-radius:4px; padding:2px 4px;"></td>
+      </tr>
+    `;
+  });
+  recalcCart();
+}
+
+function addCartRow() {
+  cart.push({ name: "", qty: 1, unit: "किलो", rate: 0 });
+  renderCart();
+}
+
+function recalcCart() {
+  let sub = 0;
+  cart.forEach(i => sub += ((Number(i.qty) || 1) * (Number(i.rate) || 0)));
+  const disc = Number(document.getElementById("cartDiscount").value) || 0;
+  const grand = Math.max(0, sub - disc);
+  document.getElementById("cartSubtotal").innerText = `₹${sub.toFixed(2)}`;
+  document.getElementById("cartGrandTotal").innerText = `₹${grand.toFixed(2)}`;
+}
+
+async function mineCounterInvoice() {
+  const cName = document.getElementById("billCustName").value.trim() || "नकद ग्राहक";
+  let sub = 0;
+  cart.forEach(i => sub += ((Number(i.qty) || 1) * (Number(i.rate) || 0)));
+  const disc = Number(document.getElementById("cartDiscount").value) || 0;
+  const grand = Math.max(0, sub - disc);
+
+  const btn = document.getElementById("mineBillBtn");
+  btn.disabled = true;
+  btn.innerText = "⛏️ इनवॉइस माइन हो रहा है...";
+
+  const last = blockchain[blockchain.length - 1];
+  let billBlock = {
+    index: blockchain.length,
+    timestamp: new Date().toISOString(),
+    prevHash: last.hash,
+    data: {
+      partyId: "COUNTER_SALE",
+      partyName: cName,
+      amount: grand.toFixed(2),
+      type: "IN",
+      tag: "COUNTER_BILL",
+      pop: `INV_${Date.now()}`,
+      note: "काउंटर नकद बिक्री"
+    },
+    nonce: 0,
+    hash: ""
+  };
+
+  billBlock = await mineBlock(billBlock, "00");
+  blockchain.push(billBlock);
+  safeSet(BK_KEY, blockchain);
+
+  btn.disabled = false;
+  btn.innerText = "⛏️ बिल माइन व प्रिंट करें";
+
+  // 1-पेज थर्मल इनवॉइस प्रिंट
+  const pArea = document.getElementById("universalPrintArea");
+  pArea.innerHTML = `
+    <div class="paper-slip">
+      <center>
+        <h3>${escapeHtml(profile.shopName)}</h3>
+        <p style="font-size:10px;">मो.: ${escapeHtml(profile.phone)} | UPI: ${escapeHtml(profile.upi)}</p>
+        <div style="font-size:10px; margin:4px 0;">दिनांक: ${new Date().toLocaleDateString('hi-IN')}</div>
+      </center>
+      <hr style="border:none; border-top:1px dashed #000; margin:4px 0;">
+      <div>ग्राहक: <b>${escapeHtml(cName)}</b></div>
+      <div style="text-align:right; font-size:14px; font-weight:bold; margin:6px 0;">कुल देय: ₹${grand.toFixed(2)}</div>
+      <div style="border-top:1px dashed #000; padding-top:4px; font-family:monospace; font-size:8.5px; word-break:break-all;">
+        <b>🔐 Cryptographic Seal:</b><br>
+        Block #${billBlock.index} | Nonce: ${billBlock.nonce}<br>
+        Hash: ${billBlock.hash}
+      </div>
+    </div>
+  `;
+
+  refreshLedgerComputations();
+  setTimeout(() => window.print(), 250);
+}
+
+function sendBillWhatsApp() {
+  const phone = document.getElementById("billCustPhone").value.trim();
+  const cName = document.getElementById("billCustName").value.trim() || "ग्राहक";
+  if (!phone || phone.length < 10) { toast("मान्य 10-अंकीय फोन नंबर भरें!"); return; }
+
+  let lines = "";
+  cart.forEach((i, idx) => {
+    if (i.name && Number(i.rate) > 0) {
+      lines += `${idx+1}. ${i.name} - ${i.qty} ${i.unit} x ₹${i.rate} = ₹${i.qty * i.rate}\n`;
+    }
+  });
+
+  const grand = document.getElementById("cartGrandTotal").innerText;
+  const msg = `*${profile.shopName}*\nनमस्ते ${cName} जी, आपका बिल:\n------------------\n${lines}------------------\n*कुल देय राशि: ${grand}*\nUPI: ${profile.upi}\nधन्यवाद! 🙏`;
+  window.open(`https://wa.me/91${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+}
+
+// =========================================================
+// 10. टूल्स, आवाज़ व यूटिलिटी (Utility Helpers)
+// =========================================================
+function sendPartyReminderWhatsApp() {
+  const p = parties.find(item => item.id === activePartyId);
+  if (!p) return;
+  const bal = getPartyBalance(p.id);
+  if (bal <= 0) { toast("कोई बकाया राशि शेष नहीं है!"); return; }
+
+  const msg = `*${profile.shopName}*\nनमस्ते ${p.name} जी, आपके खाते में कुल बकाया शेष ₹${bal.toLocaleString('en-IN')} है। कृपया समय पर भुगतान करें।\nUPI: ${profile.upi}\n_चुपाकाबरा क्रिप्टोग्राफ़िक लेज़र_ 🐉`;
+  window.open(`https://wa.me/91${p.phone}?text=${encodeURIComponent(msg)}`, '_blank');
+}
+
+function printPartyStatement() {
+  const p = parties.find(item => item.id === activePartyId);
+  if (!p) return;
+  const pArea = document.getElementById("universalPrintArea");
+  const pBlocks = blockchain.filter(b => b.index > 0 && b.data && b.data.partyId === p.id);
+
+  let rows = pBlocks.map(b => `
+    <tr>
+      <td>${new Date(b.timestamp).toLocaleDateString('hi-IN')}</td>
+      <td>${escapeHtml(b.data.note)}</td>
+      <td>${b.data.type === 'OUT' ? 'उधार' : 'जमा'}</td>
+      <td style="text-align:right;">₹${b.data.amount}</td>
+    </tr>
+  `).join("");
+
+  pArea.innerHTML = `
+    <div style="padding:10px;">
+      <h2>${escapeHtml(profile.shopName)}</h2>
+      <p>ग्राहक खाता पर्ची: <b>${escapeHtml(p.name)}</b> (मो.: ${escapeHtml(p.phone)})</p>
+      <table>
+        <thead><tr><th>दिनांक</th><th>विवरण</th><th>टाइप</th><th style="text-align:right;">रकम</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <div style="text-align:right; font-size:14px; font-weight:bold; margin-top:10px;">
+        कुल शुद्ध स्थिति: ₹${Math.abs(getPartyBalance(p.id)).toFixed(2)}
+      </div>
+    </div>
+  `;
+  setTimeout(() => window.print(), 250);
+}
+
+function openPartyQR() {
+  const p = parties.find(item => item.id === activePartyId);
+  const bal = p ? getPartyBalance(p.id) : 0;
+  const amt = bal > 0 ? bal : "";
+
+  document.getElementById("qrModalTitle").innerText = profile.shopName;
+  document.getElementById("qrModalUpi").innerText = `UPI: ${profile.upi} ${amt ? `• ₹${amt}` : ''}`;
+
+  const c = document.getElementById("qrCanvasTarget");
+  c.innerHTML = "";
+  const uri = `upi://pay?pa=${encodeURIComponent(profile.upi)}&pn=${encodeURIComponent(profile.shopName)}${amt ? `&am=${amt}` : ''}&cu=INR`;
+  new QRCode(c, { text: uri, width: 160, height: 160 });
+  openModal("qrModal");
+}
+
+function editPartyInfo() {
+  const p = parties.find(item => item.id === activePartyId);
+  if (!p) return;
+  const nn = prompt("नाम संपादित करें:", p.name);
+  if (!nn || !nn.trim()) return;
+  const np = prompt("10-अंकीय फ़ोन नंबर:", p.phone);
+  if (!/^\d{10}$/.test((np || "").trim())) { alert("अमान्य नंबर!"); return; }
+
+  p.name = nn.trim();
+  p.phone = np.trim();
+  safeSet(PARTIES_KEY, parties);
+  openPartyDetail(p.id);
+  toast("खाता विवरण अपडेट हुआ ✓");
+}
+
+function speakMunshi(txt) {
+  const bubble = document.getElementById("mascotBubble");
+  if (bubble) { bubble.innerText = txt; bubble.style.display = "block"; }
+  clearTimeout(window.mtt);
+  window.mtt = setTimeout(() => { if (bubble) bubble.style.display = "none"; }, 4000);
+
+  if (isMuted || !('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(txt);
+  u.lang = 'hi-IN';
+  u.pitch = 0.8;
+  window.speechSynthesis.speak(u);
+}
+
+function speakMunshiHonorific() {
+  speakMunshi(`गद्दी संभालिए ${profile.merchantName}! सिंगल-सोर्स क्रिप्टोग्राफ़िक खाता एकदम अखंड है।`);
+}
+
+function toggleMascotMute(e) {
+  e.stopPropagation();
+  isMuted = !isMuted;
+  localStorage.setItem("chupaMute", isMuted ? "1" : "0");
+  document.getElementById("mascotMuteBtn").innerText = isMuted ? "🔇" : "🔊";
+  toast(isMuted ? "मुंशी जी शांत हो गए 🔇" : "मुंशी जी बोलने लगे 🔊");
+}
+
+function feedChai() {
+  reactions.chai++;
+  safeSet(REACTIONS_KEY, reactions);
+  document.getElementById("cntChai").innerText = reactions.chai;
+  speakMunshi("आहा! कड़क अदरक वाली चाय! गद्दी की जय हो!");
+}
+
+function hitKutai() {
+  reactions.kutai++;
+  safeSet(REACTIONS_KEY, reactions);
+  document.getElementById("cntKutai").innerText = reactions.kutai;
+  speakMunshi("अरे बाप रे! चप्पल पड़ गई... हिसाब में कोई भूल नहीं होगी!");
+}
+
+function openGameModal() {
+  computeVaultBalance();
+  document.getElementById("cntChai").innerText = reactions.chai;
+  document.getElementById("cntKutai").innerText = reactions.kutai;
+  openModal("gameModal");
+}
+
+function openSettingsModal() {
+  document.getElementById("setShopName").value = profile.shopName;
+  document.getElementById("setMerchantName").value = profile.merchantName;
+  document.getElementById("setShopPhone").value = profile.phone;
+  document.getElementById("setShopUpi").value = profile.upi;
+  openModal("settingsModal");
+}
+
+function saveSettings() {
+  profile.shopName = document.getElementById("setShopName").value.trim() || profile.shopName;
+  profile.merchantName = document.getElementById("setMerchantName").value.trim();
+  profile.phone = document.getElementById("setShopPhone").value.trim();
+  profile.upi = document.getElementById("setShopUpi").value.trim() || profile.upi;
+  safeSet(PROFILE_KEY, profile);
+  document.getElementById("hdrShopTitle").innerText = profile.shopName;
+  closeModal("settingsModal");
+  toast("सेटिंग्स सुरक्षित हुईं ✓");
+}
+
+function downloadBackupJSON() {
+  const fullBackup = { profile, parties, blockchain, expenses };
+  const blob = new Blob([JSON.stringify(fullBackup, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `Chupakabra_SingleSource_Backup_${new Date().toISOString().slice(0, 10)}.json`;
+  a.click();
+  toast("📥 बैकअप डाउनलोड हुआ ✓");
+}
+
+function triggerRestoreJSON() { document.getElementById("jsonFileInput").click(); }
+
+function handleRestoreFile(e) {
+  const f = e.target.files[0];
+  if (!f) return;
+  const reader = new FileReader();
+  reader.onload = function(evt) {
+    try {
+      const data = JSON.parse(evt.target.result);
+      if (data.blockchain && Array.isArray(data.blockchain)) {
+        blockchain = data.blockchain;
+        if (data.parties) parties = data.parties;
+        if (data.profile) profile = data.profile;
+        if (data.expenses) expenses = data.expenses;
+
+        safeSet(BK_KEY, blockchain);
+        safeSet(PARTIES_KEY, parties);
+        safeSet(PROFILE_KEY, profile);
+        safeSet(EXP_KEY, expenses);
+
+        refreshLedgerComputations();
+        renderParties();
+        closeModal("settingsModal");
+        toast("📤 लेज़र रीस्टोर सफल ✓");
+      }
+    } catch(err) { alert("अमान्य बैकअप फ़ाइल!"); }
+  };
+  reader.readAsText(f);
+}
+
+function openModal(id) { document.getElementById(id).classList.add("show"); }
+function closeModal(id) { document.getElementById(id).classList.remove("show"); }
+function toast(msg) {
+  const t = document.getElementById("toast");
+  t.innerText = msg;
+  t.classList.add("show");
+  clearTimeout(window.tt);
+  window.tt = setTimeout(() => t.classList.remove("show"), 2000);
+}
+function escapeHtml(s) {
+  return String(s || "").replace(/[&<>"']/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[m]);
+}
+
+// इनिशियलाइजेशन
+window.addEventListener('DOMContentLoaded', async () => {
+  setTimeout(() => {
+    const s = document.getElementById("splashScreen");
+    if (s) { s.style.opacity = "0"; setTimeout(() => s.remove(), 400); }
+  }, 350);
+
+  await initBlockchain();
+  document.getElementById("hdrShopTitle").innerText = profile.shopName;
+
+  const now = new Date();
+  const days = ['रविवार','सोमवार','मंगलवार','बुधवार','गुरुवार','शुक्रवार','शनिवार'];
+  const months = ['जनवरी','फ़रवरी','मार्च','अप्रैल','मई','जून','जुलाई','अगस्त','सितम्बर','अक्टूबर','नवम्बर','दिसम्बर'];
+  document.getElementById("hdrPanchang").innerText = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+
+  refreshLedgerComputations();
+  renderParties();
+});
+</script>
